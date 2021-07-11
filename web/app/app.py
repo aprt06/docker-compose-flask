@@ -40,4 +40,8 @@ def my_callback_fn(context, future):
   # optional user-defined callback function
   print(context, future.result())
 
+def compose_callback(context,future):
+  print(context, future.result())
+
 shell2http.register_command(endpoint="saythis", command_name="echo", callback_fn=my_callback_fn, decorators=[])
+shell2http.register_command(endpoint="generate", command_name="docker-compose", callback_fn=newfile_callback, decorators=[])
