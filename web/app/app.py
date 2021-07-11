@@ -18,9 +18,13 @@ import socket
 
 from flask import Flask
 from redis import Redis
+from flask_executor import Executor
+from flask_shell2http import Shell2HTTP
 
 
 app = Flask(__name__)
+executor = Executor(app)
+
 redis = Redis(host=os.environ.get('REDIS_HOST', 'redis'), port=6379)
 
 
@@ -29,7 +33,11 @@ def hello():
     redis.incr('hits')
     return 'Hello Container World! I have been seen %s times and my hostname is %s.\n' % (redis.get('hits'),socket.gethostname())
 
-@app.route('/new-temp-key')
-def gen_temp_key():
-    return 'Hello Container World! I have been seen %s times and my hostname is %s.\n' % (redis.get('hits'),socket.gethostname())
 
+shell2http = Shell2HTTP(app=app, executor=executor, base_url_prefix="/commands/")
+
+def my_callback_fn(context, future):
+  # optional user-defined callback function
+  print(context, future.result())
+
+shell2http.register_command(endpoint="saythis", command_name="echo", callback_fn=my_callback_fn, decorators=[])
